@@ -2,9 +2,7 @@ package com.mathdojo.generator.service;
 
 import com.mathdojo.generator.model.Operation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
@@ -15,11 +13,14 @@ public class GeneratorService {
     private static final Integer MAX_ATTEMPTS = 10;
 
     public List<Operation> createSession(String operationPattern, Integer nOperations) {
-        List<Operation> operations = new ArrayList<>();
-        for (int i = 0; i < nOperations; i++) {
-            operations.add(createOperation(operationPattern));
+        Set<Operation> operations = new HashSet<>();
+        int callsToCreate = 0;
+        while (operations.size() < nOperations && callsToCreate < nOperations) {
+            Operation newOperation = createOperation(operationPattern);
+            operations.add(newOperation);
+            callsToCreate++;
         }
-        return operations;
+        return new ArrayList<>(operations);
     }
 
     private Operation createOperation (String operationPattern) {
@@ -46,10 +47,8 @@ public class GeneratorService {
                     .operators(operators)
                     .build();
             try {
-                Object calculation = genOp.calculate();
-                if (calculation instanceof Integer) {
-                    return genOp;
-                }
+                genOp.calculate();
+                return genOp;
             }
             catch (Exception e) {
                 // Ignore division by zero or other calculation errors

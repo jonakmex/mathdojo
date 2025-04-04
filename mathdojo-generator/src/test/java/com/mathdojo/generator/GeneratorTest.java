@@ -155,6 +155,27 @@ class GeneratorTest {
     }
 
     @Test
+    void should_generate_with_random_operators_and_random_factors_10_and_100 () {
+        // Given
+        String basicOperation = "??_???";
+        Integer nOperations = 1;
+        // When
+        List<Operation> operations = generatorService.createSession(basicOperation,nOperations);
+        // Then
+        assertEquals(nOperations, operations.size());
+        Operation generatedOperation = operations.getFirst();
+
+        assertTrue(generatedOperation.getFactors().getFirst() >= 10 && generatedOperation.getFactors().getFirst() <= 99, "Factor is not a two-digit integer: " + generatedOperation.getFactors().getFirst());
+        assertTrue(generatedOperation.getFactors().getLast() >= 100 && generatedOperation.getFactors().getLast()  <= 999, "Factor is not a two-digit integer: " + generatedOperation.getFactors().getLast());
+
+
+        List<Character> validOperators = Arrays.asList('+', '-', '*', '/');
+        for (Character operator : generatedOperation.getOperators()) {
+            assertTrue(validOperators.contains(operator), "Invalid operator found: " + operator);
+        }
+    }
+
+    @Test
     void should_print_operation () {
         // Given
         String basicOperation = "1+2-3*4";
@@ -169,9 +190,7 @@ class GeneratorTest {
     @Test
     void should_validate_not_valid_operation() {
         String invalidOperation = "a1+2-3*4/";
-        assertThrows(IllegalArgumentException.class, () -> {
-            generatorService.createSession(invalidOperation, 1);
-        });
+        assertThrows(IllegalArgumentException.class, () -> generatorService.createSession(invalidOperation, 1));
     }
 
     @Test
@@ -188,5 +207,19 @@ class GeneratorTest {
         assertThrows(IllegalArgumentException.class, () -> {
             generatorService.createSession(invalidOperation, 1);
         });
+    }
+
+    @Test
+    void should_generate_game() {
+        // Given
+        String invalidOperation = "1?+??";
+        Integer nOperations = 10;
+        // When
+        List<Operation> operations = generatorService.createSession(invalidOperation, nOperations);
+        operations.forEach(o -> {;
+            System.out.println(o+" = " + o.calculate());
+        });
+        // Then
+        assertTrue(nOperations>=operations.size());
     }
 }

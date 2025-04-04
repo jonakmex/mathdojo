@@ -46,6 +46,7 @@ public class Operation {
         return result;
     }
 
+    @Override
     public String toString () {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < factors.size(); i++) {
@@ -55,5 +56,20 @@ public class Operation {
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals (Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Operation operation = (Operation) o;
+
+        return this.toString().equals(operation.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
     }
 }

@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GeneratorTest {
 
@@ -165,5 +164,29 @@ class GeneratorTest {
         // Then
         String expectedString = "1+2-3*4=-9";
         assertEquals(expectedString, operation.toString() + "=" + operation.calculate());
+    }
+
+    @Test
+    void should_validate_not_valid_operation() {
+        String invalidOperation = "a1+2-3*4/";
+        assertThrows(IllegalArgumentException.class, () -> {
+            generatorService.createSession(invalidOperation, 1);
+        });
+    }
+
+    @Test
+    void should_validate_not_valid_operation_division_by_zero() {
+        String invalidOperation = "?/0";
+        assertThrows(IllegalArgumentException.class, () -> {
+            generatorService.createSession(invalidOperation, 1);
+        });
+    }
+
+    @Test
+    void should_validate_not_valid_operation_not_integer() {
+        String invalidOperation = "10/3";
+        assertThrows(IllegalArgumentException.class, () -> {
+            generatorService.createSession(invalidOperation, 1);
+        });
     }
 }

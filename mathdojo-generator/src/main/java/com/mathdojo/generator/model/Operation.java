@@ -20,10 +20,13 @@ public class Operation {
         // First pass: handle * and /
         for (int i = 0; i < tempOperators.size(); i++) {
             if (tempOperators.get(i) == '*' || tempOperators.get(i) == '/') {
-                int result = tempOperators.get(i) == '*'
-                        ? tempFactors.get(i) * tempFactors.get(i + 1)
-                        : tempFactors.get(i) / tempFactors.get(i + 1);
-                tempFactors.set(i, result);
+                Float result = tempOperators.get(i) == '*'
+                        ? (tempFactors.get(i) * tempFactors.get(i + 1))
+                        : ((float)tempFactors.get(i) / (float)tempFactors.get(i + 1));
+                if (result.intValue() != result) {
+                    throw new IllegalArgumentException("Result is not an integer: " + result);
+                }
+                tempFactors.set(i, result.intValue());
                 tempFactors.remove(i + 1);
                 tempOperators.remove(i);
                 i--; // Adjust index after removal

@@ -12,6 +12,7 @@ public class GeneratorService {
     private static final String FACTOR_WILDCARD = "?";
     private static final String OPERATORS = "[+\\-*/_]";
     private static final Character OPERATOR_WILDCARD = '_';
+    private static final Integer MAX_ATTEMPTS = 10;
 
     public List<Operation> createSession(String operationPattern, Integer nOperations) {
         List<Operation> operations = new ArrayList<>();
@@ -22,23 +23,41 @@ public class GeneratorService {
     }
 
     private Operation createOperation (String operationPattern) {
+        if (!validateOperation(operationPattern)) {
+            throw new IllegalArgumentException("Invalid operation pattern");
+        }
+
         Pattern operatorPattern = Pattern.compile(OPERATORS);
+        int attempts = 0;
+        while (attempts<MAX_ATTEMPTS) {
         List<Integer> factors = operatorPattern.splitAsStream(operationPattern)
                 .map(String::strip)
                 .filter(s -> !s.isEmpty())
                 .map(token -> token.contains(FACTOR_WILDCARD) ? getRandomFactor(token) : Integer.parseInt(token))
                 .toList();
-
         List<Character> operators = IntStream.range(0, operationPattern.length())
                 .mapToObj(operationPattern::charAt)
                 .filter(ch -> OPERATORS.indexOf(ch) >= 0)
                 .map(ch -> ch == OPERATOR_WILDCARD ? getRandomOperator(ch) : ch)
                 .toList();
 
-        return Operation.builder()
-                .factors(factors)
-                .operators(operators)
-                .build();
+            Operation genOp = Operation.builder()
+                    .factors(factors)
+                    .operators(operators)
+                    .build();
+            try {
+                Object calculation = genOp.calculate();
+                if (calculation instanceof Integer) {
+                    return genOp;
+                }
+            }
+            catch (Exception e) {
+                // Ignore division by zero or other calculation errors
+                attempts++;
+            }
+        }
+
+        throw new IllegalArgumentException("Unable to generate a valid operation after " + MAX_ATTEMPTS + " attempts");
     }
 
     private Character getRandomOperator(Character ch) {
@@ -67,5 +86,10 @@ public class GeneratorService {
             }
         }
         return Integer.parseInt(token);
+    }
+
+    private boolean validateOperation (String operationPattern) {
+        String validPattern = "^[0-9+\\-*/?_]+$";
+        return operationPattern.matches(validPattern);
     }
 }
